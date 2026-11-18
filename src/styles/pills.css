@@ -1,0 +1,68 @@
+/* pills, tags, notes */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.pill.ok,
+.pill.done {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pill.soon {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.pill.over {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pill.pro {
+  background: var(--ink);
+  color: var(--bg);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.tag {
+  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.note {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.empty {
+  padding: 28px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.empty h2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.38;
+}
+.empty p {
+  color: var(--ink-2);
+  font-size: 15px;
+  max-width: 32ch;
+}

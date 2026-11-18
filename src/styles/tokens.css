@@ -1,0 +1,157 @@
+/* Layout: one phone-width column on a plain ground. Lists are flat, with no boxes and no dividers.
+   Two objects carry the identity, both drawn as paper tickets with a tear line:
+   the month card on Home (in the colour the user picks) and the bill slip on the item page,
+   which takes an ink stamp when the bill is paid. Motion answers a tap; nothing moves on its own. */
+
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f4f2;
+  --surface-3: #e6ebe8;
+  --sheet: #ffffff;
+  --ink: #13201b;
+  --ink-2: #41504a;
+  --ink-3: #66746e;
+  --line: #e1e7e4;
+  --line-2: #ecf0ee;
+  --brand: #0f6b56;
+  --brand-press: #0b5646;
+  --on-brand: #ffffff;
+  --brand-soft: #e0f0e9;
+  --brand-text: #0d6451;
+  --hero: #0c4f41;
+  --hero-ink: #f2faf6;
+  --hero-dim: rgba(242, 250, 246, 0.78);
+  --hero-line: rgba(242, 250, 246, 0.24);
+  --mint: #9fe0c6;
+  --hero-alert: #ffb8ab;
+  --ok: #1b7a55;
+  --ok-soft: #ddf0e6;
+  --warn: #8a5300;
+  --warn-soft: #fbebcb;
+  --danger: #b3362a;
+  --danger-soft: #fae2de;
+  --on-danger: #ffffff;
+  --stamp: #2a4ba6;
+  --toast-bg: #13201b;
+  --toast-ink: #f2faf6;
+  --toast-act: #9fe0c6;
+  --scrim: rgba(19, 32, 27, 0.48);
+  --float: 0 10px 30px rgba(19, 32, 27, 0.16), 0 2px 6px rgba(19, 32, 27, 0.08);
+  --tint: 12%;
+  --on-hue: #ffffff;
+  --hue-green: #1e8a5f;
+  --hue-blue: #2f6fc2;
+  --hue-violet: #6b59c9;
+  --hue-rose: #c24a78;
+  --hue-amber: #b07508;
+  --hue-clay: #c05a30;
+  --hue-teal: #17808a;
+  --hue-slate: #56646f;
+  --font: 'LINE Seed Sans TH', 'Noto Sans Thai', 'Thonburi', 'Leelawadee UI', system-ui, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --nav: cubic-bezier(0.32, 0.72, 0, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-mode='light']) {
+    --bg: #0d1311;
+    --surface: #2b3833;
+    --surface-2: #18211e;
+    --surface-3: #26322d;
+    --sheet: #111916;
+    --ink: #e9f0ec;
+    --ink-2: #b3c0ba;
+    --ink-3: #8b9892;
+    --line: #232e2a;
+    --line-2: #1c2622;
+    --brand: #5cc7a2;
+    --brand-press: #4db591;
+    --on-brand: #072019;
+    --brand-soft: #17302a;
+    --brand-text: #7bd6b6;
+    --hero: #123f34;
+    --hero-ink: #eaf6f0;
+    --hero-dim: rgba(234, 246, 240, 0.78);
+    --hero-line: rgba(234, 246, 240, 0.22);
+    --mint: #9fe0c6;
+    --hero-alert: #ffb8ab;
+    --ok: #72d1a4;
+    --ok-soft: #16302a;
+    --warn: #edb763;
+    --warn-soft: #33290f;
+    --danger: #f2907f;
+    --danger-soft: #3a1c18;
+    --on-danger: #2a0e0a;
+    --stamp: #9db7ff;
+    --toast-bg: #e9f0ec;
+    --toast-ink: #0d1311;
+    --toast-act: #0f6b56;
+    --scrim: rgba(0, 0, 0, 0.62);
+    --float: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --tint: 22%;
+    --on-hue: #0d1311;
+    --hue-green: #72d1a4;
+    --hue-blue: #8bb8f2;
+    --hue-violet: #b7a9f5;
+    --hue-rose: #f09db7;
+    --hue-amber: #e6b866;
+    --hue-clay: #f0a482;
+    --hue-teal: #6fcbd2;
+    --hue-slate: #b0bcc6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark']:not([data-mode='light']),
+:root[data-mode='dark'] {
+  --bg: #0d1311;
+  --surface: #2b3833;
+  --surface-2: #18211e;
+  --surface-3: #26322d;
+  --sheet: #111916;
+  --ink: #e9f0ec;
+  --ink-2: #b3c0ba;
+  --ink-3: #8b9892;
+  --line: #232e2a;
+  --line-2: #1c2622;
+  --brand: #5cc7a2;
+  --brand-press: #4db591;
+  --on-brand: #072019;
+  --brand-soft: #17302a;
+  --brand-text: #7bd6b6;
+  --hero: #123f34;
+  --hero-ink: #eaf6f0;
+  --hero-dim: rgba(234, 246, 240, 0.78);
+  --hero-line: rgba(234, 246, 240, 0.22);
+  --mint: #9fe0c6;
+  --hero-alert: #ffb8ab;
+  --ok: #72d1a4;
+  --ok-soft: #16302a;
+  --warn: #edb763;
+  --warn-soft: #33290f;
+  --danger: #f2907f;
+  --danger-soft: #3a1c18;
+  --on-danger: #2a0e0a;
+  --stamp: #9db7ff;
+  --toast-bg: #e9f0ec;
+  --toast-ink: #0d1311;
+  --toast-act: #0f6b56;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --float: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --tint: 22%;
+  --on-hue: #0d1311;
+  --hue-green: #72d1a4;
+  --hue-blue: #8bb8f2;
+  --hue-violet: #b7a9f5;
+  --hue-rose: #f09db7;
+  --hue-amber: #e6b866;
+  --hue-clay: #f0a482;
+  --hue-teal: #6fcbd2;
+  --hue-slate: #b0bcc6;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,204 @@
+/* month card: a ticket in the colour the user picked */
+.month {
+  position: relative;
+  background: var(--hc, var(--hero));
+  color: var(--hero-ink);
+  border-radius: 26px;
+  padding: 20px 20px 12px;
+}
+.month .lbl {
+  font-size: 13.5px;
+  color: var(--hero-dim);
+}
+.month .big {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 2px;
+}
+.month .paid {
+  font-size: 13px;
+  color: var(--hero-dim);
+  margin-top: 8px;
+}
+.mtop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.mtop .iconbtn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--hero-ink);
+  margin: -4px -4px 0 0;
+}
+.mtop .iconbtn:active {
+  background: rgba(255, 255, 255, 0.26);
+}
+.mbar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--hero-line);
+  margin-top: 14px;
+  overflow: hidden;
+}
+.mbar i {
+  display: block;
+  height: 100%;
+  background: var(--mint);
+  border-radius: 3px;
+}
+.mperf {
+  position: relative;
+  margin: 16px -20px 0;
+  border-top: 2px dashed var(--hero-line);
+}
+.mperf::before,
+.mperf::after {
+  content: '';
+  position: absolute;
+  top: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.mperf::before {
+  left: -10px;
+}
+.mperf::after {
+  right: -10px;
+}
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-top: 12px;
+}
+.wd7 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 0 4px;
+  color: var(--hero-ink);
+  text-align: center;
+  min-width: 0;
+}
+.wd7 .w {
+  font-size: 11.5px;
+  color: var(--hero-dim);
+  line-height: 1.4;
+}
+.wd7 .d {
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.wd7:active .d {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.9);
+}
+.wd7.today .d {
+  background: var(--hero-ink);
+  color: var(--hc, var(--hero));
+}
+.wd7 .a {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.wd7.has .a {
+  background: var(--mint);
+}
+.month.lightcard {
+  --hero-ink: #13201b;
+  --hero-dim: rgba(19, 32, 27, 0.72);
+  --hero-line: rgba(19, 32, 27, 0.18);
+  --mint: #0f6b56;
+  --hero-alert: #9e2a1f;
+}
+.month.lightcard .mtop .iconbtn {
+  background: rgba(19, 32, 27, 0.08);
+}
+.month.lightcard .wd7:active .d {
+  background: rgba(19, 32, 27, 0.12);
+}
+.cardsw.lightcard {
+  color: #13201b;
+}
+.picker {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+.cpick {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--hc);
+  flex: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.cpick.on {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 2px;
+}
+.cpick input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.cardsw {
+  height: 56px;
+  border-radius: 16px;
+  background: var(--hc);
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: transform 0.12s;
+}
+.cardsw:active {
+  transform: scale(0.95);
+}
+.cardsw[aria-pressed='true'] {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-mode='light']) .month.preset,
+  :root:not([data-theme='light']):not([data-mode='light']) .cardsw.preset {
+    background: color-mix(in srgb, var(--hc, var(--hero)) 78%, #000);
+  }
+}
+:root[data-theme='dark']:not([data-mode='light']) .month.preset,
+:root[data-mode='dark'] .month.preset,
+:root[data-theme='dark']:not([data-mode='light']) .cardsw.preset,
+:root[data-mode='dark'] .cardsw.preset {
+  background: color-mix(in srgb, var(--hc, var(--hero)) 78%, #000);
+}

@@ -1,0 +1,156 @@
+/* bill slip */
+.slip {
+  background: var(--surface-2);
+  border-radius: 26px;
+  position: relative;
+}
+.slip.thud {
+  animation: thud 0.32s 0.3s ease-out;
+}
+@keyframes thud {
+  40% {
+    transform: translateY(3px) scale(0.992);
+  }
+}
+.slip-top {
+  padding: 20px 20px 18px;
+  position: relative;
+}
+.who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.who h2 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.slip-amt {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 14px;
+}
+.slip-due {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.slip-due b {
+  color: var(--ink);
+  font-weight: 700;
+}
+.perf {
+  position: relative;
+  border-top: 2px dashed var(--surface-3);
+}
+.perf::before,
+.perf::after {
+  content: '';
+  position: absolute;
+  top: -11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.perf::before {
+  left: -10px;
+}
+.perf::after {
+  right: -10px;
+}
+.slip-stub {
+  padding: 16px 20px 20px;
+}
+.stub-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  min-height: 32px;
+}
+.stub-head h3 {
+  font-size: 14px;
+  font-weight: 700;
+}
+.qr {
+  display: block;
+  margin: 0 auto 10px;
+  width: 184px;
+  max-width: 100%;
+  border-radius: 16px;
+  background: #fff;
+  padding: 10px;
+}
+.qr.big {
+  width: 100%;
+  max-width: 340px;
+}
+.acc-no {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.slip .btn.soft,
+.slip .btn.plain {
+  background: var(--surface);
+  color: var(--ink);
+}
+.stamp {
+  position: absolute;
+  right: 18px;
+  top: 74px;
+  transform: rotate(-11deg);
+  color: var(--stamp);
+  border: 2.5px solid currentColor;
+  border-radius: 10px;
+  padding: 3px 12px 4px;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow:
+    inset 0 0 0 2px var(--surface-2),
+    inset 0 0 0 3px currentColor;
+  pointer-events: none;
+}
+.stamp b {
+  display: block;
+  font-size: 19px;
+  font-weight: 800;
+}
+.stamp small {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+}
+.stamp.fresh {
+  animation: stamp 0.5s 0.2s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.stamp.fresh.gone {
+  animation:
+    stamp 0.5s 0.2s cubic-bezier(0.3, 1.5, 0.5, 1) both,
+    stampout 0.45s 1.7s ease-in forwards;
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-11deg) scale(2.6);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes stampout {
+  to {
+    opacity: 0;
+    transform: rotate(-11deg) scale(0.9);
+  }
+}

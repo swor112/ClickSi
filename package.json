@@ -1,0 +1,16 @@
+{
+  "name": "clicksi",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{js,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.10.1",
+    "vite": "^6.4.6"
+  }
+}

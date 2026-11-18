@@ -1,0 +1,122 @@
+/* add and edit: basics on top, the rest folded into rows that open in place */
+.tpls {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -20px 4px;
+  padding: 2px 20px;
+}
+.tpls::-webkit-scrollbar {
+  display: none;
+}
+.tpls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 15px 0 6px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex: none;
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s,
+    transform 0.12s;
+}
+.tpls button:active {
+  transform: scale(0.95);
+}
+.tpls button[aria-pressed='true'] {
+  background: var(--brand-soft);
+  color: var(--brand-text);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+}
+.namerow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.basics > .f:first-child {
+  margin-top: 8px;
+}
+.tilebtn {
+  position: relative;
+  flex: none;
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+.tilebtn:active {
+  transform: scale(0.92);
+}
+.tilebtn .pen {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--bg);
+}
+.basics {
+  padding-bottom: 18px;
+}
+.dsec {
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 8px;
+}
+.disc {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: calc(100% + 20px);
+  margin: 0 -10px;
+  padding: 10px;
+  min-height: 66px;
+  border-radius: 16px;
+  text-align: left;
+  transition: background 0.15s;
+}
+.disc:active {
+  background: var(--surface-2);
+}
+.disc .dt {
+  font-weight: 600;
+  font-size: 15.5px;
+}
+.disc .dv {
+  font-size: 13px;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+.disc .chev {
+  transition: transform 0.22s var(--ease);
+}
+.disc[aria-expanded='true'] .chev {
+  transform: rotate(90deg);
+}
+.dbody {
+  padding: 0 0 18px;
+}
+.dbody > .f:first-child,
+.dbody > .toggle:first-child {
+  margin-top: 4px;
+}
+.dbody.reveal {
+  animation: reveal 0.28s var(--ease);
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

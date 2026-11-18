@@ -1,0 +1,41 @@
+/* auth */
+.auth {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand b {
+  font-size: 24px;
+  font-weight: 800;
+}
+.auth .link {
+  align-self: flex-start;
+}
+.auth h1 {
+  font-size: 30px;
+  line-height: 1.38;
+  font-weight: 800;
+}
+.auth .lead-p {
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  #splash,
+  .ghost {
+    display: none;
+  }
+}

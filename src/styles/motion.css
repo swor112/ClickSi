@@ -1,0 +1,381 @@
+/* Opening: the mark stamps in on a brand-colour curtain, the curtain lifts, the first screen rises into place. */
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--hero);
+  color: #f2faf6;
+  pointer-events: none;
+  animation: sp-out 0.55s 1.05s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+.sp-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.sp-mark {
+  width: 84px;
+  height: 84px;
+  animation: sp-pop 0.62s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.sp-mark .tk {
+  fill: #f2faf6;
+}
+.sp-mark .ck {
+  fill: none;
+  stroke: var(--hero);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 15;
+  stroke-dashoffset: 15;
+  animation: sp-draw 0.36s 0.42s ease-out forwards;
+}
+.sp-word {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow: hidden;
+}
+.sp-word span {
+  display: block;
+  animation: sp-word 0.5s 0.34s var(--ease) both;
+}
+@keyframes sp-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-14deg);
+  }
+}
+@keyframes sp-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes sp-word {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes sp-out {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+/* Moving between screens: the screen you leave stays on as a still picture (.ghost) while the next one moves over it.
+   fwd/back slide sideways, up/down is the add form coming from the bottom, tab is a quick fade through. */
+.ghost {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ghost.top {
+  z-index: 3;
+}
+.ghost[data-anim='up']::before,
+.ghost[data-anim='down']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  max-width: 480px;
+  transform: translateX(-50%);
+  background: #000;
+}
+.gbox {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+.gbox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+}
+.gbox .view {
+  min-height: 0;
+  z-index: auto;
+}
+.ghost .tabbar,
+.ghost .actbar {
+  position: absolute;
+  left: 0;
+  transform: none;
+  max-width: none;
+}
+.view[data-anim='fwd'] {
+  animation: v-in-r 0.42s var(--nav) backwards;
+}
+.ghost[data-anim='fwd'] .gbox {
+  animation: g-out-l 0.42s var(--nav) forwards;
+}
+.ghost[data-anim='fwd'] .gbox::after {
+  animation: g-dim 0.42s var(--nav) forwards;
+}
+.view[data-anim='back'] {
+  animation: v-in-l 0.42s var(--nav) backwards;
+}
+.ghost[data-anim='back'] .gbox {
+  animation: g-out-r 0.42s var(--nav) forwards;
+}
+.view[data-anim='up'] {
+  animation: v-in-b 0.5s var(--nav) backwards;
+}
+.ghost[data-anim='up'] .gbox {
+  animation: g-sink 0.5s var(--nav) forwards;
+}
+.view[data-anim='down'] {
+  animation: v-float 0.46s var(--nav) backwards;
+}
+.ghost[data-anim='down'] .gbox {
+  animation: g-out-b 0.46s var(--nav) forwards;
+}
+.view[data-anim='tab'] {
+  animation: v-fade 0.3s 0.05s ease-out backwards;
+}
+.ghost[data-anim='tab'] .gbox {
+  animation: g-fade 0.14s ease-in forwards;
+}
+@keyframes v-in-r {
+  from {
+    transform: translateX(100%);
+    box-shadow: -14px 0 36px rgba(0, 0, 0, 0.16);
+  }
+  to {
+    box-shadow: -14px 0 36px rgba(0, 0, 0, 0);
+  }
+}
+@keyframes g-out-l {
+  to {
+    transform: translateX(-26%);
+  }
+}
+@keyframes g-dim {
+  to {
+    opacity: 0.14;
+  }
+}
+@keyframes v-in-l {
+  from {
+    transform: translateX(-26%);
+    opacity: 0.55;
+  }
+}
+@keyframes g-out-r {
+  from {
+    box-shadow: -14px 0 36px rgba(0, 0, 0, 0.16);
+  }
+  to {
+    transform: translateX(100%);
+    box-shadow: -14px 0 36px rgba(0, 0, 0, 0);
+  }
+}
+@keyframes v-in-b {
+  from {
+    transform: translateY(100vh);
+    border-radius: 28px 28px 0 0;
+  }
+}
+@keyframes g-sink {
+  to {
+    transform: scale(0.93);
+    border-radius: 22px;
+    opacity: 0.6;
+  }
+}
+@keyframes v-float {
+  from {
+    transform: scale(0.93);
+    border-radius: 22px;
+    opacity: 0.6;
+  }
+}
+.view[data-anim='down'] {
+  transform-origin: 50% var(--oy, 50vh);
+}
+@keyframes g-out-b {
+  from {
+    border-radius: 28px 28px 0 0;
+  }
+  to {
+    transform: translateY(100%);
+    border-radius: 28px 28px 0 0;
+  }
+}
+@keyframes v-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes g-fade {
+  to {
+    opacity: 0;
+  }
+}
+/* first screen after the curtain, and the screen after signing in or out: pieces rise one after another */
+.view[data-anim='boot'] > *,
+.view[data-anim='enter'] > *,
+.auth.boot > *,
+.auth.enter > * {
+  animation: rise-in 0.6s var(--ease) backwards;
+  animation-delay: calc(var(--bd, 0s) + var(--i, 0) * 70ms);
+}
+.view[data-anim='boot'],
+.auth.boot {
+  --bd: 1.02s;
+}
+.view > *:nth-child(2),
+.auth > *:nth-child(2) {
+  --i: 1;
+}
+.view > *:nth-child(3),
+.auth > *:nth-child(3) {
+  --i: 2;
+}
+.view > *:nth-child(4),
+.auth > *:nth-child(4) {
+  --i: 3;
+}
+.view > *:nth-child(5),
+.auth > *:nth-child(5) {
+  --i: 4;
+}
+.view > *:nth-child(6),
+.auth > *:nth-child(6) {
+  --i: 5;
+}
+.view > *:nth-child(n + 7),
+.auth > *:nth-child(n + 7) {
+  --i: 6;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+/* switching tabs: rows follow the screen in, a beat apart */
+.view[data-anim='tab'] .list > .row {
+  animation: row-in 0.4s var(--ease) backwards;
+  animation-delay: calc(80ms + var(--r, 0) * 34ms);
+}
+.list > .row:nth-child(2) {
+  --r: 1;
+}
+.list > .row:nth-child(3) {
+  --r: 2;
+}
+.list > .row:nth-child(4) {
+  --r: 3;
+}
+.list > .row:nth-child(5) {
+  --r: 4;
+}
+.list > .row:nth-child(6) {
+  --r: 5;
+}
+.list > .row:nth-child(n + 7) {
+  --r: 6;
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.view[data-anim] .mbar i {
+  animation: grow 0.8s 0.16s var(--ease) both;
+}
+.view[data-anim='boot'] .mbar i {
+  animation-delay: 1.35s;
+}
+@keyframes grow {
+  from {
+    width: 0;
+  }
+}
+.view[data-anim='tab'] .wd7.has .a,
+.view[data-anim='enter'] .wd7.has .a {
+  animation: pop 0.4s 0.4s var(--ease) both;
+}
+.view[data-anim='boot'] .wd7.has .a {
+  animation: pop 0.4s 1.6s var(--ease) both;
+}
+@keyframes pop {
+  from {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.5);
+  }
+}
+/* bars come up from the bottom edge with the screen they belong to */
+.tabbar.rise,
+.actbar.rise {
+  animation: bar-up 0.46s 0.06s var(--nav) backwards;
+}
+.view[data-anim='boot'] ~ .tabbar.rise {
+  animation-delay: 1.3s;
+}
+.view[data-anim='up'] ~ .actbar.rise {
+  animation-delay: 0.24s;
+}
+@keyframes bar-up {
+  from {
+    transform: translate(-50%, 130%);
+  }
+}
+#itemsList.swap,
+.daylist.swap {
+  animation: v-fade 0.26s ease-out;
+}
+.cal.next,
+.cal-title b.next {
+  animation: cal-n 0.32s var(--ease);
+}
+.cal.prev,
+.cal-title b.prev {
+  animation: cal-p 0.32s var(--ease);
+}
+@keyframes cal-n {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+}
+@keyframes cal-p {
+  from {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+}
+.btn.busy::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,77 @@
+/* install prompt + guide */
+.ibanner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--surface-2);
+  border-radius: 18px;
+  padding: 10px 6px 10px 14px;
+  margin-top: 12px;
+  color: var(--ink-2);
+}
+.ibanner p {
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+.ibanner b {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.ibanner .btn.sm {
+  height: 36px;
+  padding: 0 14px;
+  flex: none;
+}
+.ibanner .iconbtn {
+  width: 32px;
+  height: 32px;
+  color: var(--ink-3);
+}
+.isteps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+}
+.isteps li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.stepno {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.isteps b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.isteps b .i {
+  color: var(--brand-text);
+}
+.isteps .hint .i {
+  display: inline-block;
+  vertical-align: -3px;
+}
+.warnbox {
+  font-size: 13.5px;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 14px;
+  padding: 12px 14px;
+}

@@ -1,0 +1,107 @@
+/* headers */
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  margin-bottom: 16px;
+}
+.head h1 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.head .sub {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.hbtns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sub-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  margin: 0 -8px 10px;
+}
+.sub-head h1 {
+  font-size: 17px;
+  font-weight: 600;
+  flex: 1;
+}
+.iconbtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  flex: none;
+  position: relative;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.iconbtn:active {
+  background: var(--surface-2);
+  transform: scale(0.9);
+}
+.iconbtn .count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--danger);
+  color: var(--on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--bg);
+}
+.sec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 28px 0 4px;
+  min-height: 28px;
+}
+.sec h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.sec.late h2 {
+  color: var(--danger);
+}
+.sec .meta {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-text);
+  padding: 4px 0;
+  flex: none;
+}
+.chipbtn {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--brand-text);
+  background: var(--brand-soft);
+  border-radius: 99px;
+  padding: 6px 14px;
+  flex: none;
+  transition: transform 0.12s;
+}
+.chipbtn:active {
+  transform: scale(0.94);
+}

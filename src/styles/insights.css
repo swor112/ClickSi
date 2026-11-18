@@ -1,0 +1,75 @@
+/* insights */
+.bigfig {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.barlist {
+  margin-top: 6px;
+}
+.br {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-size: 14px;
+}
+.br .bt {
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 5px;
+}
+.br .bf {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--brand);
+  border-radius: 5px;
+}
+.view[data-anim] .br .bf {
+  animation: grow 0.7s 0.1s var(--ease) both;
+}
+.br .bv {
+  font-weight: 600;
+}
+.cols {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  height: 132px;
+  border-bottom: 1px solid var(--line);
+  margin-top: 12px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  padding: 0 4px;
+}
+.col i {
+  display: block;
+  width: 100%;
+  max-width: 30px;
+  border-radius: 6px 6px 0 0;
+  background: var(--surface-3);
+  transition: background 0.15s;
+}
+.col[aria-pressed='true'] i {
+  background: var(--brand);
+}
+.colx {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+  margin-top: 6px;
+}
+.colx span.on {
+  color: var(--ink);
+  font-weight: 700;
+}
