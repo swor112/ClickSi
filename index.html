@@ -517,6 +517,7 @@ input[type=date].inp::-webkit-date-and-time-value,input[type=time].inp::-webkit-
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#splash,.ghost{display:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><div class="sp-in"><svg class="sp-mark" viewBox="0 0 32 32"><path class="tk" d="M8 4h16a4 4 0 0 1 4 4v5a3 3 0 0 0 0 6v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-5a3 3 0 0 0 0-6V8a4 4 0 0 1 4-4z"/><path class="ck" d="M11.4 16.4l3.3 3.3 6-6.8"/></svg><div class="sp-word"><span>Click Si</span></div></div></div>
@@ -927,7 +928,7 @@ const subHead=(title,extra='',close=false)=>`<header class="sub-head"><button ty
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ADMIN_IDLE=15*6e4,MAX_TRIES=5,LOCK_MIN=5;
 let adminAuthAt=0,authBusy=false;      /* adminAuthAt lives in memory only: a reload asks for the password again */
-const adminExists=()=>Object.values(usersDB()).some(u=>u&&u.role==='admin'&&!u.suspended);
+const adminExists=()=>CLOUD||Object.values(usersDB()).some(u=>u&&u.role==='admin'&&!u.suspended);
 const needSudo=()=>!adminAuthAt||Date.now()-adminAuthAt>ADMIN_IDLE;
 const canAdmin=()=>isAdmin()&&!needSudo();
 
@@ -964,6 +965,7 @@ const DUMMY_PW='pbkdf2$150000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAA
 async function signIn(email,pw,adminOnly){
   const mins=lockedMin(email);
   if(mins)return{msg:'ลองผิดหลายครั้งเกินไป ลองใหม่ได้ในอีก '+mins+' นาที'};
+  if(CLOUD)return cloudSignIn(email,pw,adminOnly);
   const db=usersDB(),u=db[email];
   const good=await pwCheck(pw,u?u.pass:DUMMY_PW)&&!!u&&(!adminOnly||u.role==='admin');
   if(!good){
@@ -1027,6 +1029,13 @@ async function doAuth(e){
     if(!name)return fail('a_name',admin?'ใส่ชื่อผู้ดูแล':'ใส่ชื่อเล่นก่อนสมัคร');
     if(bad)return fail('a_pass',bad);
     if(pw!==$('#a_pass2').value)return fail('a_pass2','รหัสผ่านสองช่องไม่ตรงกัน');
+    if(CLOUD){
+      const r=await cloudSignUp(email,pw,name);
+      if(!r.ok)return toast(r.msg);
+      if(r.confirm){S.authTab='login';render();return toast('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ')}
+      user=r.user;user.seenBc=Date.now();saveUser();adminAuthAt=0;
+      loadItems();enter();return;
+    }
     if(usersDB()[email])return fail('a_email','อีเมลนี้มีบัญชีอยู่แล้ว เลือกเข้าสู่ระบบแทน');
     const pass=await pwHash(pw);
     if(admin&&adminExists())return toast('มีบัญชีผู้ดูแลอยู่แล้ว เข้าสู่ระบบแทน');
@@ -1039,7 +1048,7 @@ async function doAuth(e){
   }finally{authBusy=false;const b=$('#authForm button[type=submit]');if(b){b.disabled=false;b.classList.remove('busy')}}
 }
 function enter(){setSession();applyMode();loadInbox();nav.stack=[];Object.assign(S,{view:'home',q:'',cat:'all',sort:'due',calY:null,uq:''});lastDue=null;nav.anim='enter';render();window.scrollTo(0,0);tick()}
-function logout(){store.del('cs_session');adminAuthAt=0;clearTimeout(toastT);$('#toast').classList.remove('on');$('#toast').innerHTML='';user=null;items=[];inbox=[];draft=null;nav.stack=[];S.authTab='login';S.an=null;closeSheet();applyMode();nav.anim='enter';render();window.scrollTo(0,0)}
+function logout(){if(CLOUD)cloudSignOut();store.del('cs_session');adminAuthAt=0;clearTimeout(toastT);$('#toast').classList.remove('on');$('#toast').innerHTML='';user=null;items=[];inbox=[];draft=null;nav.stack=[];S.authTab='login';S.an=null;closeSheet();applyMode();nav.anim='enter';render();window.scrollTo(0,0)}
 
 /* the back office asks for the password again after a reload or 15 idle minutes */
 function openAdmin(){if(!isAdmin())return;if(!needSudo())return push('admin');sudoSheet()}
@@ -1077,8 +1086,16 @@ async function pwSave(e){
   const mins=lockedMin(user.email);if(mins)return toast('ลองผิดหลายครั้งเกินไป ลองใหม่ได้ในอีก '+mins+' นาที');
   authBusy=true;
   try{
-    if(!await pwCheck(o,user.pass)){noteFail(user.email);return fail('pw_old','รหัสผ่านปัจจุบันไม่ถูกต้อง')}
-    clearFail(user.email);user.pass=await pwHash(n);saveUser();
+    if(CLOUD){
+      const v=await sb.auth.signInWithPassword({email:user.email,password:o});
+      if(v.error){if(/invalid/i.test(v.error.message)){noteFail(user.email);return fail('pw_old','รหัสผ่านปัจจุบันไม่ถูกต้อง')}return toast(cloudMsg(v.error))}
+      const u=await sb.auth.updateUser({password:n});
+      if(u.error)return toast(cloudMsg(u.error));
+      clearFail(user.email);
+    }else{
+      if(!await pwCheck(o,user.pass)){noteFail(user.email);return fail('pw_old','รหัสผ่านปัจจุบันไม่ถูกต้อง')}
+      clearFail(user.email);user.pass=await pwHash(n);saveUser();
+    }
     if(isAdmin())audit('เปลี่ยนรหัสผ่านผู้ดูแล');
     closeSheet();toast('เปลี่ยนรหัสผ่านแล้ว');
   }finally{authBusy=false}
@@ -1506,6 +1523,7 @@ function dueNote(it,key){
 function resolveInbox(itemId,cycle,done){let hit=false;inbox.forEach(n=>{if(n.itemId===itemId&&n.cycle===cycle){n.done=done;if(done)n.read=true;hit=true}});if(hit)saveInbox()}
 function tick(){
   if(!user||!guardSession())return;
+  if(CLOUD)cloudPoll();
   const now=Date.now(),fk='cs_fired_'+user.email,fresh=[];let fired=store.get(fk,{});
   if(!fired||typeof fired!=='object')fired={};
   items.forEach(it=>{
@@ -2029,6 +2047,238 @@ setInterval(tick,30000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')tick()});
 window.addEventListener('storage',e=>{if(user&&(e.key==='cs_session'||e.key==='cs_users'))tick()});      /* sign-out or suspension in another tab applies here too */
 window.addEventListener('hashchange',()=>{if(!user&&location.hash==='#admin'){S.authTab='admin';render()}});
+/* ---------- cloud: Supabase ----------
+   With a key below, accounts live in Supabase Auth and every save is mirrored to the database
+   (tables in supabase/schema.sql). The rest of the app keeps working on localStorage exactly as before:
+   it acts as the on-device copy, and store.set forwards the keys that matter.
+   Without a key, or if the library cannot load, the app runs on this device only, as before. */
+const SUPABASE_URL='https://vyiemwyfivipdcgytopu.supabase.co';
+const SUPABASE_KEY='';      /* the publishable (anon) key: meant to be public. Never put the secret / service_role key here. */
+const sb=SUPABASE_KEY&&window.supabase&&window.supabase.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const CLOUD=!!sb;
+const cloud={uid:null,pulling:false,dirty:false,dataT:null,dataAt:null,snap:{},auditTs:0,auditSent:new Set(),ev:[],evT:null,lastPoll:0,polling:false,warned:0};
+
+function cloudMsg(e){
+  const m=String(e&&e.message||e||'');
+  if(/invalid login|invalid credentials/i.test(m))return'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+  if(/not confirmed/i.test(m))return'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ส่งไปก่อน แล้วค่อยเข้าสู่ระบบ';
+  if(/already (registered|exists)/i.test(m))return'อีเมลนี้มีบัญชีอยู่แล้ว เลือกเข้าสู่ระบบแทน';
+  if(/rate limit|too many/i.test(m))return'ลองบ่อยเกินไป รอสักครู่แล้วลองใหม่';
+  if(/weak|password should/i.test(m))return'รหัสผ่านนี้ง่ายเกินไป ลองใช้รหัสอื่น';
+  if(/fetch|network|load failed/i.test(m))return'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่';
+  return'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง ('+m.slice(0,60)+')';
+}
+function cloudWarn(e){console.warn('Click Si cloud:',e);if(Date.now()-cloud.warned>60000){cloud.warned=Date.now();toast('บันทึกขึ้นคลาวด์ไม่สำเร็จ จะลองใหม่อัตโนมัติ')}}
+const cloudRun=q=>Promise.resolve(q).then(r=>{if(r&&r.error)cloudWarn(r.error);return r},cloudWarn);
+function withPull(fn){cloud.pulling=true;try{return fn()}finally{cloud.pulling=false}}
+const mine=()=>!!(CLOUD&&cloud.uid&&user&&user.uid===cloud.uid);
+
+/* profile row <-> the app's user object. Everything that is not a column travels in settings. */
+const PROF_KEYS=['uid','email','pass','name','role','pro','suspended'];
+function profToUser(p){
+  const s=p.settings&&typeof p.settings==='object'&&!Array.isArray(p.settings)?p.settings:{};
+  return Object.assign({},s,{uid:p.id,email:String(p.email||'').toLowerCase(),pass:'!cloud',name:p.name,role:p.role,pro:!!p.pro,suspended:!!p.suspended,created:s.created||String(p.created_at||'').slice(0,10)});
+}
+function userSettings(u){const s={};for(const k in u)if(!PROF_KEYS.includes(k))s[k]=u[k];return s}
+const profSig=u=>JSON.stringify([u.name,u.role,!!u.pro,!!u.suspended,userSettings(u)]);
+
+/* Pull everything this account needs into the on-device copy. */
+async function cloudLoad(){
+  const g=await sb.auth.getUser();
+  const au=g.data&&g.data.user;if(!au)throw g.error||new Error('no session');
+  let pr=await sb.from('profiles').select('*').eq('id',au.id).maybeSingle();
+  if(pr.error)throw pr.error;
+  let p=pr.data;
+  if(!p){      /* the sign-up trigger did not run (schema added later): make the row now */
+    pr=await sb.from('profiles').insert({id:au.id,email:String(au.email).toLowerCase(),name:String(au.user_metadata&&au.user_metadata.name||'เพื่อน').slice(0,30)}).select().single();
+    if(pr.error)throw pr.error;p=pr.data;
+  }
+  if(p.suspended){await sb.auth.signOut();cloud.uid=null;return{msg:'บัญชีนี้ถูกระงับ ติดต่อผู้ดูแลระบบ'}}
+  const admin=p.role==='admin',none=Promise.resolve({data:null});
+  const [d,c,b,all,log]=await Promise.all([
+    sb.from('user_data').select('*').eq('user_id',au.id).maybeSingle(),
+    sb.from('app_config').select('config').eq('id',1).maybeSingle(),
+    sb.from('broadcasts').select('data').order('ts',{ascending:false}).limit(20),
+    admin?sb.from('profiles').select('*').order('email'):Promise.resolve({data:[p]}),
+    admin?sb.from('audit_log').select('ts,email,text').order('ts',{ascending:false}).limit(100):none
+  ]);
+  for(const r of[d,c,b,all,log])if(r.error)throw r.error;
+  const email=String(p.email).toLowerCase(),db={};
+  (all.data||[]).forEach(x=>{const u=profToUser(x);if(u.email)db[u.email]=u});
+  db[email]=profToUser(p);
+  withPull(()=>{
+    store.set('cs_users',db);
+    const cf=c.data&&c.data.config;
+    if(cf&&typeof cf==='object'&&Object.keys(cf).length)store.set('cs_config',cf);
+    store.set('cs_broadcasts',(b.data||[]).map(x=>x.data).filter(x=>x&&typeof x==='object'));
+    if(log.data)store.set('cs_audit',log.data.map(a=>({ts:Date.parse(a.ts)||0,by:a.email||'',text:a.text})));
+    if(d.data){store.set('cs_items_'+email,Array.isArray(d.data.items)?d.data.items:[]);store.set('cs_inbox_'+email,Array.isArray(d.data.inbox)?d.data.inbox:[])}
+  });
+  CFG=loadCfg();
+  cloud.uid=au.id;cloud.snap={};for(const e in db)cloud.snap[e]=profSig(db[e]);
+  cloud.auditTs=Date.now();cloud.lastPoll=Date.now();
+  cloud.dataAt=d.data?d.data.updated_at:null;
+  /* First time on the cloud: whatever this device already had for this email goes up as the starting point. */
+  if(!d.data){cloud.dirty=true;setTimeout(cloudFlush,0)}
+  return{ok:true,user:normUser(db[email])};
+}
+
+async function cloudSignIn(email,pw,adminOnly){
+  try{
+    const same=!!(user&&user.email===email&&mine());      /* re-entering the password for the back office */
+    const {error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error){
+      if(/invalid/i.test(error.message)){
+        const locked=noteFail(email);
+        if(adminOnly)audit('เข้าสู่ระบบผู้ดูแลไม่สำเร็จ '+email);
+        return{msg:locked?'ลองผิดครบ '+MAX_TRIES+' ครั้ง พักการเข้าสู่ระบบของอีเมลนี้ '+LOCK_MIN+' นาที':'อีเมลหรือรหัสผ่านไม่ถูกต้อง'};
+      }
+      return{msg:cloudMsg(error)};
+    }
+    clearFail(email);
+    if(same)return isAdmin()||!adminOnly?{ok:true,user}:{msg:'บัญชีนี้ไม่มีสิทธิ์ผู้ดูแล'};
+    const r=await cloudLoad();
+    if(!r.ok)return r;
+    if(adminOnly&&r.user.role!=='admin'){await sb.auth.signOut();cloud.uid=null;return{msg:'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือบัญชีนี้ไม่มีสิทธิ์ผู้ดูแล'}}
+    track('sign_in');
+    return r;
+  }catch(e){return{msg:cloudMsg(e)}}
+}
+async function cloudSignUp(email,pw,name){
+  try{
+    const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name},emailRedirectTo:location.origin+location.pathname}});
+    if(error)return{msg:cloudMsg(error)};
+    if(!data.session)return{ok:true,confirm:true};      /* email confirmation is switched on in Supabase */
+    const r=await cloudLoad();
+    if(r.ok)track('sign_up');
+    return r;
+  }catch(e){return{msg:cloudMsg(e)}}
+}
+function cloudSignOut(){
+  flushEvents();
+  const p=cloudFlush();cloud.uid=null;cloud.snap={};
+  p.finally(()=>sb.auth.signOut());
+}
+/* On start-up: a saved Supabase session signs straight in. */
+function cloudResume(){
+  sb.auth.getSession().then(async({data})=>{
+    if(!data||!data.session||user)return;
+    try{
+      const r=await cloudLoad();
+      if(user)return;
+      if(!r.ok){toast(r.msg);return}
+      user=r.user;adminAuthAt=0;loadItems();loadInbox();enter();
+    }catch(e){toast(cloudMsg(e))}
+  });
+  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&user&&user.uid&&cloud.uid){cloud.uid=null;logout()}});
+}
+
+/* ---- writing: every store.set of a synced key is forwarded ---- */
+const storeSetLocal=store.set;
+store.set=function(k,v){const r=storeSetLocal(k,v);if(!cloud.pulling&&mine())cloudOnSet(k,v);return r};
+function cloudOnSet(k,v){
+  if(k==='cs_items_'+user.email||k==='cs_inbox_'+user.email){cloud.dirty=true;clearTimeout(cloud.dataT);cloud.dataT=setTimeout(cloudFlush,1200);return}
+  if(k==='cs_users')return pushUsers(v);
+  if(k==='cs_config'&&isAdmin())return cloudRun(sb.from('app_config').upsert({id:1,config:v,updated_at:new Date().toISOString()}));
+  if(k==='cs_broadcasts'&&isAdmin())return pushBroadcasts(v);
+  if(k==='cs_audit')return pushAudit(v);
+}
+async function cloudFlush(){
+  clearTimeout(cloud.dataT);cloud.dataT=null;
+  if(!cloud.dirty||!mine())return;
+  cloud.dirty=false;
+  const at=new Date().toISOString(),uidNow=cloud.uid;
+  const r=await sb.from('user_data').upsert({user_id:uidNow,items:store.get('cs_items_'+user.email,[]),inbox:store.get('cs_inbox_'+user.email,[]),updated_at:at}).then(x=>x,e=>({error:e}));
+  if(r.error){if(cloud.uid===uidNow){cloud.dirty=true;cloud.dataT=setTimeout(cloudFlush,15000)}cloudWarn(r.error)}
+  else cloud.dataAt=at;
+}
+function pushUsers(db){
+  if(!db||typeof db!=='object')return;
+  for(const e in db){
+    const u=db[e];if(!u||!u.uid)continue;
+    const own=u.uid===cloud.uid;if(!own&&!isAdmin())continue;
+    const sg=profSig(u);if(cloud.snap[e]===sg)continue;cloud.snap[e]=sg;
+    const row=own?{name:String(u.name||'').slice(0,30),settings:userSettings(u)}:{};
+    if(isAdmin()){row.role=u.role==='admin'?'admin':'user';row.pro=!!u.pro;row.suspended=!!u.suspended}
+    cloudRun(sb.from('profiles').update(row).eq('id',u.uid));
+  }
+}
+async function pushBroadcasts(L){
+  const rows=(Array.isArray(L)?L:[]).filter(b=>b&&ID_RE.test(b.id)).map(b=>({id:b.id,ts:+b.ts||Date.now(),data:b}));
+  if(rows.length){const r=await cloudRun(sb.from('broadcasts').upsert(rows));if(!r||r.error)return}
+  const q=sb.from('broadcasts').delete();
+  cloudRun(rows.length?q.not('id','in','('+rows.map(r=>r.id).join(',')+')'):q.neq('id',''));
+}
+function pushAudit(L){
+  const key=a=>a.ts+'|'+a.text,fresh=(Array.isArray(L)?L:[]).filter(a=>a&&a.ts>=cloud.auditTs&&a.by===user.email&&!cloud.auditSent.has(key(a)));
+  if(!fresh.length)return;
+  fresh.forEach(a=>cloud.auditSent.add(key(a)));
+  cloudRun(sb.from('audit_log').insert(fresh.reverse().map(a=>({user_id:cloud.uid,email:a.by,text:String(a.text).slice(0,300),ts:new Date(a.ts).toISOString()}))));
+}
+
+/* ---- reading: changes made on another device, by an admin, or new announcements ---- */
+async function cloudPoll(){
+  if(!mine()||cloud.polling||Date.now()-cloud.lastPoll<45000||document.visibilityState==='hidden')return;
+  cloud.polling=true;cloud.lastPoll=Date.now();
+  const uidNow=cloud.uid;
+  try{
+    const admin=isAdmin();
+    const [pr,d,b]=await Promise.all([
+      admin?sb.from('profiles').select('*').order('email'):sb.from('profiles').select('*').eq('id',uidNow),
+      sb.from('user_data').select('updated_at').eq('user_id',uidNow).maybeSingle(),
+      sb.from('broadcasts').select('data').order('ts',{ascending:false}).limit(20)
+    ]);
+    if(!mine()||cloud.uid!==uidNow)return;
+    if(!pr.error&&pr.data){
+      const db=usersDB();
+      pr.data.forEach(x=>{
+        const u=profToUser(x);if(!u.email)return;
+        if(x.id===uidNow){const me=db[u.email]||u;me.role=u.role;me.pro=u.pro;me.suspended=u.suspended;db[u.email]=me}      /* own settings stay as edited here */
+        else{db[u.email]=u;cloud.snap[u.email]=profSig(u)}
+      });
+      withPull(()=>store.set('cs_users',db));
+    }
+    if(!b.error&&b.data)withPull(()=>store.set('cs_broadcasts',b.data.map(x=>x.data).filter(x=>x&&typeof x==='object')));
+    const remote=d.data&&d.data.updated_at;
+    if(!d.error&&remote&&Date.parse(remote)!==Date.parse(cloud.dataAt||0)&&!cloud.dirty&&!draft){
+      const full=await sb.from('user_data').select('*').eq('user_id',uidNow).maybeSingle();
+      if(!full.error&&full.data&&mine()&&cloud.uid===uidNow&&!cloud.dirty&&!draft){
+        withPull(()=>{store.set('cs_items_'+user.email,full.data.items||[]);store.set('cs_inbox_'+user.email,full.data.inbox||[])});
+        cloud.dataAt=full.data.updated_at;loadItems();loadInbox();refreshBadge();keepRender();
+      }
+    }
+  }catch(e){console.warn('Click Si cloud poll:',e)}
+  finally{cloud.polling=false}
+}
+
+/* ---- usage statistics: screens and button presses, sent in batches ----
+   Only the name of the function a button calls (e.g. openItem) and the screen, never names, amounts or anything typed. */
+function track(name,props){
+  if(!mine()&&name!=='sign_in'&&name!=='sign_up')return;
+  if(!cloud.uid)return;
+  cloud.ev.push({name:String(name).slice(0,40),props:props||{},ts:new Date().toISOString()});
+  if(cloud.ev.length>=50)flushEvents();
+  else if(!cloud.evT)cloud.evT=setTimeout(flushEvents,10000);
+}
+function flushEvents(){
+  clearTimeout(cloud.evT);cloud.evT=null;
+  const L=cloud.ev.splice(0,200);if(!L.length||!cloud.uid)return;
+  const id=cloud.uid;
+  sb.from('events').insert(L.map(e=>({user_id:id,name:e.name,props:e.props,ts:e.ts}))).then(r=>{if(r.error)console.warn('Click Si stats:',r.error)},()=>{});
+}
+if(CLOUD){
+  document.addEventListener('click',e=>{
+    const el=e.target.closest&&e.target.closest('[onclick]');if(!el||!mine())return;
+    const fn=(String(el.getAttribute('onclick')).match(/[A-Za-z_$][\w$]*/)||[''])[0];
+    if(fn&&fn!=='event')track('click',{fn,view:S.view});
+  },true);
+  const viewWas=[push,tab];
+  push=function(view,...a){track('view',{view});return viewWas[0].call(this,view,...a)};
+  tab=function(view){if(view!==S.view)track('view',{view});return viewWas[1].call(this,view)};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){cloudFlush();flushEvents()}else cloudPoll()});
+  window.addEventListener('pagehide',()=>{cloudFlush();flushEvents()});
+}else if(SUPABASE_KEY)setTimeout(()=>toast('เชื่อมต่อคลาวด์ไม่ได้ ตอนนี้ข้อมูลจะเก็บไว้ในเครื่องนี้เท่านั้น'),2000);
+
 /* One-time clean-up: earlier versions shipped a sample admin with a known password. */
 (function secMigrate(){
   if(store.get('cs_sec_v',0)>=1)return;
@@ -2044,7 +2294,8 @@ window.addEventListener('hashchange',()=>{if(!user&&location.hash==='#admin'){S.
 })();
 (function init(){
   const had=store.get('cs_session',null),s=readSession(),db=usersDB();
-  if(s&&db[s.email]&&!db[s.email].suspended){user=normUser(db[s.email]);loadItems();loadInbox();setSession()}
+  if(CLOUD)cloudResume();
+  else if(s&&db[s.email]&&!db[s.email].suspended){user=normUser(db[s.email]);loadItems();loadInbox();setSession()}
   else if(had)store.del('cs_session');
   if(!user&&location.hash==='#admin')S.authTab='admin';
   applyMode();nav.anim='boot';render();tick();
